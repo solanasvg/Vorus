@@ -1,0 +1,430 @@
+<html><head><base href="/" />
+<meta name="description" content="This is a fun simulator for illustrative purposes only. No actual harm can occur." />
+<title>SAFE Virus Simulator</title>
+<style>
+body {
+    background: #000;
+    margin: 0;
+    padding: 0;
+}
+
+.cmd-window {
+    background-color: #000;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    padding: 20px;
+    border: 2px solid #0f0;
+    white-space: pre-wrap;
+}
+
+.blink {
+    animation: blink 1s infinite;
+}
+
+#warningModal, #optionsModal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #000;
+    padding: 20px;
+    z-index: 1000;
+    border-radius: 0;
+    max-width: 600px;
+    color: #0f0;
+    text-align: left;
+    font-family: 'Courier New', monospace;
+    border: 2px solid #0f0;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    display: block; /* Changed from not having a display property */
+}
+
+#optionsModal {
+    display: none; /* Initially hidden */
+}
+
+.modal h2 {
+    color: #0f0;
+    text-align: center;
+    border-bottom: 1px solid #0f0;
+    padding-bottom: 10px;
+}
+
+.modal ul {
+    border-left: 1px solid #0f0;
+    padding-left: 20px;
+    margin: 15px 0;
+}
+
+.modal button {
+    background: #000;
+    color: #0f0;
+    border: 1px solid #0f0;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.modal button:hover {
+    background: #0f0;
+    color: #000;
+}
+
+.option-row {
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.slider {
+    width: 200px;
+    background: #0f0;
+}
+
+.checkbox {
+    accent-color: #0f0;
+}
+
+.warning-text {
+    color: #ff0000;
+    font-weight: bold;
+    animation: warning-flash 0.5s infinite;
+}
+
+@keyframes warning-flash {
+    0%, 49% { color: #ff0000; }
+    50%, 100% { color: #ff4400; }
+}
+
+.terminal-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #000;
+    border: 2px solid #0f0;
+    color: #0f0;
+    padding: 20px;
+    font-family: 'Courier New', monospace;
+    z-index: 2000;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+}
+
+.terminal-overlay button {
+    background: #000;
+    color: #0f0;
+    border: 1px solid #0f0;
+    padding: 5px 10px;
+    margin: 5px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+}
+
+.terminal-overlay button:hover {
+    background: #0f0;
+    color: #000;
+}
+</style>
+</head>
+<body>
+
+<div id="warningModal" class="modal">
+    <h2>⚠️ SYSTEM WARNING ⚠️</h2>
+    <p>C:\VIRUS\WARNING> Initiating virus simulation that performs:</p>
+    <ul>
+        <li>> Multiple window operations</li>
+        <li>> Audio system access</li>
+        <li>> File system operations</li>
+        <li>> CPU resource allocation</li>
+        <li class="warning-text">> HYPERVIRUS: Browser history and website access</li>
+    </ul>
+    <p>SECURITY STATUS: SAFE SIMULATION ENVIRONMENT</p>
+    <p>INTEGRITY CHECK: NO SYSTEM DAMAGE POSSIBLE</p>
+    <p>ABORT PROCEDURE: Close windows or system restart</p>
+    <p>REQUIREMENT: Enable popup windows for this domain</p>
+    <button onclick="startSimulation()">C:\> EXECUTE VIRUS.EXE<span class="blink">_</span></button>
+    <button onclick="crashTab()">C:\> DELETE VIRUS.EXE<span class="blink">_</span></button>
+    <button onclick="showOptions()">C:\> OPTIONS VIRUS.EXE<span class="blink">_</span></button>
+</div>
+
+<div id="optionsModal" class="modal">
+    <h2>⚠️ VIRUS OPTIONS ⚠️</h2>
+    <div class="option-row">
+        <label>CPU Usage Intensity (%):</label>
+        <input type="range" id="cpuIntensity" class="slider" min="10" max="1000" value="50" onchange="showSliderWarning()">
+    </div>
+    <div class="option-row">
+        <label>Window Spawn Rate:</label>
+        <input type="range" id="spawnRate" class="slider" min="1" max="1000" value="50" onchange="showSliderWarning()">
+    </div>
+    <div class="option-row">
+        <label>Enable Sound Effects:</label>
+        <input type="checkbox" id="enableSound" class="checkbox" checked>
+    </div>
+    <div class="option-row">
+        <label>Enable File Downloads:</label>
+        <input type="checkbox" id="enableDownloads" class="checkbox" checked>
+    </div>
+    <div class="option-row">
+        <label class="warning-text">Enable HYPERVIRUS Mode:</label>
+        <input type="checkbox" id="enableHypervirus" class="checkbox" onchange="toggleHypervirus(this)">
+    </div>
+    <button onclick="saveOptions()">C:\> SAVE OPTIONS<span class="blink">_</span></button>
+    <button onclick="closeOptions()">C:\> EXIT OPTIONS<span class="blink">_</span></button>
+</div>
+
+<script>
+let simulationOptions = {
+    cpuIntensity: 50,
+    spawnRate: 50,
+    enableSound: true,
+    enableDownloads: true,
+    enableHypervirus: false
+};
+
+const popularWebsites = [
+    'https://www.google.com',
+    'https://www.youtube.com',
+    'https://www.facebook.com',
+    'https://www.twitter.com',
+    'https://www.instagram.com',
+    'https://www.reddit.com',
+    'https://www.wikipedia.org',
+    'https://www.amazon.com',
+    'https://www.netflix.com',
+    'https://www.linkedin.com',
+    'https://www.zombo.com',
+    'https://www.lingscars.com',
+    'https://www.rinkworks.com',
+    'https://www.spacejam.com/1996',
+    'https://www.checkboxrace.com',
+    'https://www.theuselessweb.com',
+    'https://www.neopets.com',
+    'https://www.heavens-above.com',
+    'https://www.textfiles.com',
+    'https://www.archive.org'
+];
+
+function openRandomWebsite() {
+    if (!simulationOptions.enableHypervirus) return;
+    const randomSite = popularWebsites[Math.floor(Math.random() * popularWebsites.length)];
+    window.open(randomSite, '_blank');
+    // Attempt to open history (this may be blocked by browser security)
+    window.open('chrome://history', '_blank');
+}
+
+function showOptions() {
+    document.getElementById('optionsModal').style.display = 'block';
+    document.getElementById('warningModal').style.display = 'none';
+}
+
+function closeOptions() {
+    document.getElementById('optionsModal').style.display = 'none';
+    document.getElementById('warningModal').style.display = 'block';
+}
+
+function saveOptions() {
+    simulationOptions = {
+        cpuIntensity: parseInt(document.getElementById('cpuIntensity').value),
+        spawnRate: parseInt(document.getElementById('spawnRate').value),
+        enableSound: document.getElementById('enableSound').checked,
+        enableDownloads: document.getElementById('enableDownloads').checked,
+        enableHypervirus: document.getElementById('enableHypervirus').checked
+    };
+    closeOptions();
+}
+
+function crashTab() {
+    while(true) {
+        let array = new Array(10000000).fill(Math.random());
+        array.sort();
+    }
+}
+
+function generateRandomText(length) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+}
+
+function downloadFile(content, filename) {
+    if (!simulationOptions.enableDownloads) return;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+function wasteCPU() {
+    const iterations = Math.floor(1000000 * (simulationOptions.cpuIntensity / 100));
+    let result = 0;
+    for(let i = 0; i < iterations; i++) {
+        result += Math.sqrt(i) * Math.cos(i);
+    }
+    return result;
+}
+
+function startSimulation() {
+    document.getElementById('warningModal').style.display = 'none';
+    let startTime = Date.now();
+    let windowCount = 0;
+    let downloadCount = 0;
+
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function getIntensityMultiplier() {
+        return simulationOptions.enableHypervirus ? 100 : 1;
+    }
+
+    function playAnnoyingSound() {
+        if (!simulationOptions.enableSound) return;
+        const oscillator = audioContext.createOscillator();
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(Math.random() * 1000 + 200, audioContext.currentTime);
+        oscillator.connect(audioContext.destination);
+        oscillator.start();
+        setTimeout(() => oscillator.stop(), 200);
+    }
+
+    function spawnWindow() {
+        const newWindow = window.open('', '', 'width=400,height=300');
+        if (newWindow) {
+            newWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body {
+                            background-color: #000;
+                            color: #0f0;
+                            font-family: 'Courier New', monospace;
+                            padding: 20px;
+                            margin: 0;
+                        }
+                        .blink {
+                            animation: blink 1s infinite;
+                        }
+                        @keyframes blink {
+                            0%, 49% { opacity: 1; }
+                            50%, 100% { opacity: 0; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="cmd-window">
+                        C:\\VIRUS\\WINDOW_${windowCount++}> EXECUTING VIRUS SIMULATION...
+                        <br>WARNING: You can stop this by closing the window
+                        <br>STATUS: Spawning additional processes...
+                        <br>> <span class="blink">_</span>
+                    </div>
+                    <script>
+                        function shakeWindow() {
+                            const maxMove = 100;
+                            setInterval(() => {
+                                const x = Math.random() * maxMove - maxMove/2;
+                                const y = Math.random() * maxMove - maxMove/2;
+                                window.moveBy(x, y);
+                            }, 10);
+                        }
+                        shakeWindow();
+
+                        setTimeout(() => {
+                            for(let i = 0; i < 2; i++) {
+                                const newWin = window.open('', '', 'width=400,height=300');
+                                if (newWin) newWin.document.write(document.documentElement.outerHTML);
+                            }
+                        }, 5000);
+                    <\/script>
+                </body>
+                </html>
+            `);
+        }
+    }
+
+    let simInterval = setInterval(() => {
+        const elapsedTime = (Date.now() - startTime) / 1000;
+        const intensityMultiplier = getIntensityMultiplier();
+        
+        if (simulationOptions.enableDownloads) {
+            for (let i = 0; i < intensityMultiplier; i++) {
+                const fileContent = generateRandomText(102400);
+                downloadFile(fileContent, `file${++downloadCount}.txt`);
+            }
+        }
+        
+        // Hypervirus mode: open random websites
+        if (simulationOptions.enableHypervirus && elapsedTime > 5) {
+            for (let i = 0; i < Math.min(5, Math.floor(elapsedTime / 10)); i++) {
+                openRandomWebsite();
+            }
+        }
+        
+        wasteCPU();
+
+        if (elapsedTime >= 10) {
+            const spawnProbability = (simulationOptions.spawnRate / 100) * intensityMultiplier;
+            if (elapsedTime >= 60) {
+                for (let i = 0; i < Math.floor((elapsedTime - 60) / 2 * spawnProbability) + 2; i++) {
+                    spawnWindow();
+                }
+            } else if (elapsedTime >= 20 && Math.floor(elapsedTime) % Math.max(2, Math.floor(24 * (1 - spawnProbability))) === 0) {
+                spawnWindow();
+            } else {
+                spawnWindow();
+            }
+        }
+
+        if (elapsedTime >= 20 && simulationOptions.enableSound) {
+            for (let i = 0; i < intensityMultiplier; i++) {
+                playAnnoyingSound();
+            }
+        }
+
+    }, 1000 / getIntensityMultiplier());
+}
+
+function showSliderWarning() {
+    if (document.getElementById('cpuIntensity').value > 100 || 
+        document.getElementById('spawnRate').value > 100) {
+        const overlay = document.createElement('div');
+        overlay.className = 'terminal-overlay';
+        overlay.innerHTML = `
+            <p>C:\\VIRUS\\WARNING> One or more sliders are set to more than 100%.</p>
+            <button onclick="this.parentElement.remove()">ACKNOWLEDGE_</button>
+        `;
+        document.body.appendChild(overlay);
+    }
+}
+
+function toggleHypervirus(checkbox) {
+    if (checkbox.checked) {
+        const overlay = document.createElement('div');
+        overlay.className = 'terminal-overlay';
+        overlay.innerHTML = `
+            <p>C:\\VIRUS\\WARNING> Are you sure you want to turn this on?</p>
+            <p>STATUS: Hypervirus is 10000% as intense and will open random websites</p>
+            <button onclick="confirmHypervirus(true, this)">PROCEED_</button>
+            <button onclick="confirmHypervirus(false, this)">ABORT_</button>
+        `;
+        document.body.appendChild(overlay);
+    }
+}
+
+function confirmHypervirus(confirmed, button) {
+    const checkbox = document.getElementById('enableHypervirus');
+    checkbox.checked = confirmed;
+    button.parentElement.remove();
+}
+</script>
+</body>
+</html>
